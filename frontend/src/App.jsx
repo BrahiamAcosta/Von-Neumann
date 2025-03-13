@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import MemoryTable from "./components/MemoryTable";
 import "./App.css";
 function App() {
   const [data, setData] = useState({ status: "initial" });
@@ -60,16 +61,21 @@ function App() {
       ) : (
         <>
           <div className="container">
-            <div className="component_box">
+            <div>
               <h2>Unidad de Control (CU)</h2>
-              <p>Contador: {data.cu.counter}</p>
-              <p>Registro de Instrucciones: {data.cu.instructions_registry}</p>
-              <p>Operación: {data.cu.operation}</p>
+              <div className="component_box">
+                <p>Contador: {data.cu.counter}</p>
+                <p>
+                  Registro de Instrucciones: {data.cu.instructions_registry}
+                </p>
+                <p>Operación: {data.cu.operation}</p>
+              </div>
             </div>
 
             <div className="component_box">
               <h2>Memoria (MEM)</h2>
               <p>Registro de Dirección: {data.mem.dir_registry}</p>
+              <MemoryTable memory={Object.entries(data.mem.memory)} />
               <p>Registro de Datos: {data.mem.data_registry}</p>
             </div>
 

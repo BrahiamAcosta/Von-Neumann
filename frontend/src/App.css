@@ -13,6 +13,8 @@
 }
 
 .component_box {
+  display: flex;
+  flex-direction: row;
   margin: 1rem;
   padding: 1rem;
   border: 1px solid #ccc;
