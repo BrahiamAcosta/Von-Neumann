@@ -10,13 +10,18 @@ class ALU():
     result = (acumulator + i_registry) % 256
     self.accumulator = format(result,'08b')
     return None
+  
+  def reset(self):
+    self.accumulator = '00000000'
+    self.i_registry = '00000000'
+    return None
 
 
 class CU():
   def __init__(self):
     self.counter = '0000'
-    self.instructions_registry = None
-    self.operation = None
+    self.instructions_registry = '0000'
+    self.operation = '0000'
 
   def decoder(self, instruction):
     table = {
@@ -32,6 +37,11 @@ class CU():
       self.counter = format(number, '04b')
       return None
 
+  def reset(self):
+    self.counter = '0000'
+    self.instructions_registry = '0000'
+    self.operation = '0000'
+    return None
 
 class MEM():
   def __init__(self):
@@ -47,3 +57,18 @@ class MEM():
         '0110':'00000000',
         '0111':'00000000',
     }
+  
+  def reset(self):
+    self.dir_registry = '00000000'
+    self.data_registry = '00000000'
+    self.memory_table = {
+        '0000':'00000100',
+        '0001':'00000101',
+        '0010':'01100111',
+        '0011':'01110000',
+        '0100':'00001001',
+        '0101':'00010100',
+        '0110':'00000000',
+        '0111':'00000000',
+    }
+    return None

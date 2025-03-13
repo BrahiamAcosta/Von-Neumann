@@ -1,27 +1,13 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 function App() {
-  const [data, setData] = useState({
-    alu: {
-      accumulator: "",
-      i_registry: "",
-    },
-    cu: {
-      counter: "",
-      instructions_registry: "",
-      operation: "",
-    },
-    mem: {
-      dir_registry: "",
-      data_registry: "",
-      memory: {},
-    },
-    status: "initial",
-  });
+  const [data, setData] = useState({ status: "initial" });
 
   const step = async () => {
     try {
-      const response = await fetch("http://localhost:8000/step");
+      const response = await fetch(
+        `http://localhost:8000/${data.status === "initial" ? "init" : "step"}`
+      );
 
       if (!response.ok) {
         throw new Error(`Error HTTP: ${response.status}`);
@@ -35,6 +21,19 @@ function App() {
     }
   };
 
+  const reset = async () => {
+    try {
+      const request = await fetch("http://localhost:8000/reset");
+      if (!request.ok) {
+        throw new Error(`Error HTTP: ${request.status}`);
+      }
+      const newState = await request.json();
+      setData(newState);
+    } catch (error) {
+      console.error("Error al reiniciar el proceso:", error);
+    }
+  };
+
   useEffect(() => {
     step();
   }, []);
@@ -45,24 +44,44 @@ function App() {
       {data.status === "initial" ? (
         <h2>Cargando...</h2>
       ) : data.status === "finished" ? (
-        <h2>Proceso Finalizado</h2>
+        <>
+          <h2>Proceso Finalizado</h2>
+          <button
+            onClick={() => {
+              setData({
+                status: "initial",
+              });
+              reset();
+            }}
+          >
+            Reiniciar
+          </button>
+        </>
       ) : (
-        <div>
-          <h2>Unidad Aritmético-Lógica (ALU)</h2>
-          <p>Acumulador: {data.alu.accumulator}</p>
-          <p>Registro de Instrucción: {data.alu.i_registry}</p>
+        <>
+          <div className="container">
+            <div className="component_box">
+              <h2>Unidad de Control (CU)</h2>
+              <p>Contador: {data.cu.counter}</p>
+              <p>Registro de Instrucciones: {data.cu.instructions_registry}</p>
+              <p>Operación: {data.cu.operation}</p>
+            </div>
 
-          <h2>Unidad de Control (CU)</h2>
-          <p>Contador: {data.cu.counter}</p>
-          <p>Registro de Instrucciones: {data.cu.instructions_registry}</p>
-          <p>Operación: {data.cu.operation}</p>
+            <div className="component_box">
+              <h2>Memoria (MEM)</h2>
+              <p>Registro de Dirección: {data.mem.dir_registry}</p>
+              <p>Registro de Datos: {data.mem.data_registry}</p>
+            </div>
 
-          <h2>Memoria (MEM)</h2>
-          <p>Registro de Dirección: {data.mem.dir_registry}</p>
-          <p>Registro de Datos: {data.mem.data_registry}</p>
+            <div className="component_box">
+              <h2>Unidad Aritmético-Lógica (ALU)</h2>
+              <p>Acumulador: {data.alu.accumulator}</p>
+              <p>Registro de Instrucción: {data.alu.i_registry}</p>
+            </div>
+          </div>
 
           <button onClick={step}>Ejecutar Paso</button>
-        </div>
+        </>
       )}
     </div>
   );

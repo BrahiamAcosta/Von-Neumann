@@ -7,10 +7,10 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],  # Permitir el origen del frontend
+    allow_origins=["http://localhost:5173"],
     allow_credentials=True,
-    allow_methods=["*"],  # Permitir todos los métodos (GET, POST, etc.)
-    allow_headers=["*"],  # Permitir todos los headers
+    allow_methods=["*"],
+    allow_headers=["*"],  
 )
 
 alu = ALU()
@@ -26,9 +26,51 @@ class StepRequest(BaseModel):
 def read_root():
     return {"message": "¡Servidor en funcionamiento!"}
 
+@app.get("/init")
+def initial_values():
+   return {
+      "status": "ok",
+        "alu": {
+            "accumulator": alu.accumulator,
+            "i_registry": alu.i_registry
+        },
+        "cu": {
+            "counter": cu.counter,
+            "instructions_registry": cu.instructions_registry,
+            "operation": cu.operation
+        },
+        "mem": {
+           "dir_registry": mem.dir_registry,
+           "data_registry": mem.data_registry,
+           "memory": mem.memory_table
+        }
+   }
+
+@app.get("/reset")
+def reset():
+    alu.reset()
+    cu.reset()
+    mem.reset()
+    return {
+        "status": "ok",
+        "alu": {
+            "accumulator": alu.accumulator,
+            "i_registry": alu.i_registry
+        },
+        "cu": {
+            "counter": cu.counter,
+            "instructions_registry": cu.instructions_registry,
+            "operation": cu.operation
+        },
+        "mem": {
+           "dir_registry": mem.dir_registry,
+           "data_registry": mem.data_registry,
+           "memory": mem.memory_table
+        }
+    }
 
 @app.get("/step")
-def execute_step(request: StepRequest):
+def execute_step():
     if cu.operation == "...":
         return {"status": "finished", "memory": mem.memory_table}
     mem.dir_registry = cu.counter
