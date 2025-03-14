@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import MemoryTable from "./components/MemoryTable";
+import DataField from "./components/DataField";
 import "./App.css";
 function App() {
   const [data, setData] = useState({ status: "initial" });
@@ -61,28 +62,48 @@ function App() {
       ) : (
         <>
           <div className="container">
-            <div>
-              <h2>Unidad de Control (CU)</h2>
-              <div className="component_box">
-                <p>Contador: {data.cu.counter}</p>
-                <p>
-                  Registro de Instrucciones: {data.cu.instructions_registry}
-                </p>
-                <p>Operación: {data.cu.operation}</p>
+            <div className="component_box">
+              <div className="component_box_header">
+                <h2>Unidad de Control (CU)</h2>
+              </div>
+              <div className="component_box_content">
+                <DataField name="Contador: " data={data.cu.counter} />
+                <DataField
+                  name="Registro de Instrucciones:"
+                  data={data.cu.instructions_registry}
+                />
+                <DataField name="Operación: " data={data.cu.operation} />
               </div>
             </div>
 
             <div className="component_box">
-              <h2>Memoria (MEM)</h2>
-              <p>Registro de Dirección: {data.mem.dir_registry}</p>
-              <MemoryTable memory={Object.entries(data.mem.memory)} />
-              <p>Registro de Datos: {data.mem.data_registry}</p>
+              <div className="component_box_header">
+                <h2>Memoria (MEM)</h2>
+              </div>
+              <div className="component_box_content">
+                <DataField
+                  name="Registro de Dirección: "
+                  data={data.mem.dir_registry}
+                />
+                <MemoryTable memory={Object.entries(data.mem.memory)} />
+                <DataField
+                  name="Registro de Datos: "
+                  data={data.mem.data_registry}
+                />
+              </div>
             </div>
 
             <div className="component_box">
-              <h2>Unidad Aritmético-Lógica (ALU)</h2>
-              <p>Acumulador: {data.alu.accumulator}</p>
-              <p>Registro de Instrucción: {data.alu.i_registry}</p>
+              <div className="component_box_header">
+                <h2>Unidad Aritmético-Lógica (ALU)</h2>
+              </div>
+              <div className="component_box_content">
+                <DataField name="Acumulador: " data={data.alu.accumulator} />
+                <DataField
+                  name="Registro de Instrucción: "
+                  data={data.alu.i_registry}
+                />
+              </div>
             </div>
           </div>
 
