@@ -4,6 +4,8 @@ import DataField from "./components/DataField";
 import "./App.css";
 function App() {
   const [data, setData] = useState({ status: "initial" });
+  const [stepLogs, setStepLogs] = useState([]);
+  const [currentLog, setCurrentLog] = useState(0);
 
   const step = async () => {
     try {
@@ -17,7 +19,11 @@ function App() {
 
       const newState = await response.json();
 
-      setData(newState);
+      if (data.status === "initial" || newState.status === "finished") {
+        setData(newState);
+      }
+      setStepLogs(newState.step_logs || []);
+      setCurrentLog(0);
     } catch (error) {
       console.error("Error al avanzar el paso:", error);
     }
@@ -33,6 +39,23 @@ function App() {
       setData(newState);
     } catch (error) {
       console.error("Error al reiniciar el proceso:", error);
+    }
+  };
+
+  const nextLog = () => {
+    if (currentLog < stepLogs.length) {
+      const log = stepLogs[currentLog];
+
+      setData((prevData) => ({
+        ...prevData,
+        cu: { ...prevData.cu, ...log.cu },
+        alu: { ...prevData.alu, ...log.alu },
+        mem: { ...prevData.mem, ...log.mem },
+      }));
+
+      setCurrentLog(currentLog + 1);
+    } else {
+      step();
     }
   };
 
@@ -98,16 +121,16 @@ function App() {
                 <h2>Unidad Aritmético-Lógica (ALU)</h2>
               </div>
               <div className="component_box_content">
-                <DataField name="Acumulador: " data={data.alu.accumulator} />
                 <DataField
                   name="Registro de Instrucción: "
                   data={data.alu.i_registry}
                 />
+                <DataField name="Acumulador: " data={data.alu.accumulator} />
               </div>
             </div>
           </div>
 
-          <button onClick={step}>Ejecutar Paso</button>
+          <button onClick={nextLog}>Ejecutar Paso</button>
         </>
       )}
     </div>

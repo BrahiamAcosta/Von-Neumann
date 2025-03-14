@@ -20,8 +20,8 @@ class ALU():
 class CU():
   def __init__(self):
     self.counter = '0000'
-    self.instructions_registry = '0000'
-    self.operation = '0000'
+    self.instructions_registry = ''
+    self.operation = ''
 
   def decoder(self, instruction):
     table = {
@@ -39,14 +39,14 @@ class CU():
 
   def reset(self):
     self.counter = '0000'
-    self.instructions_registry = '0000'
-    self.operation = '0000'
+    self.instructions_registry = ''
+    self.operation = ''
     return None
 
 class MEM():
   def __init__(self):
-    self.dir_registry = '00000000'
-    self.data_registry = '00000000'
+    self.dir_registry = ''
+    self.data_registry = ''
     self.memory_table = {
         '0000':'00000100',
         '0001':'00000101',
@@ -59,8 +59,8 @@ class MEM():
     }
   
   def reset(self):
-    self.dir_registry = '00000000'
-    self.data_registry = '00000000'
+    self.dir_registry = ''
+    self.data_registry = ''
     self.memory_table = {
         '0000':'00000100',
         '0001':'00000101',
