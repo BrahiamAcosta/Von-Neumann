@@ -7,7 +7,7 @@ function DataField({ name, data }) {
   // Detecta si el dato cambió y activa el resaltado temporal
   useEffect(() => {
     setHighlight(true);
-    const timer = setTimeout(() => setHighlight(false), 700);
+    const timer = setTimeout(() => setHighlight(false), 800);
 
     return () => clearTimeout(timer);
   }, [data]);
