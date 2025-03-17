@@ -178,7 +178,7 @@ function App() {
           </div>
 
           <div className="buttons_container">
-            <button onClick={nextLog}>Ejecutar Paso</button>
+            {!isAutoMode && <button onClick={nextLog}>Ejecutar Paso</button>}
             <button onClick={toggleAutoMode}>
               {isAutoMode ? "Detener" : "Modo Automático"}
             </button>
