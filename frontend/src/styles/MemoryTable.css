@@ -24,3 +24,9 @@ td {
   height: 100%;
   width: 60%;
 }
+
+.memory_table td.highlight {
+  background-color: rgb(146, 146, 142);
+  font-weight: bold;
+  transition: background-color 0.8s ease-in-out;
+}

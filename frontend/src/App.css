@@ -14,9 +14,9 @@
 }
 
 .buttons_container {
+  padding: 1rem;
   display: flex;
   flex-direction: row;
-  margin: 1.1rem;
   align-items: center;
   justify-content: center;
 }
