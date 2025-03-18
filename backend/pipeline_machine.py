@@ -58,6 +58,7 @@ class PipelineProcessor:
 
         # Decode stage
         if self.stages['decode']['busy']:
+            self.pipeline_cycles += base_cycle_cost  # Incrementamos ciclos en decode
             decoded = self.decode_instruction(self.stages['decode']['instruction'])
             if decoded:
                 self.stages['execute']['instruction'] = decoded
@@ -67,6 +68,7 @@ class PipelineProcessor:
 
         # Fetch stage
         if not self.stages['fetch']['busy'] and self.pc in self.memory:
+            self.pipeline_cycles += base_cycle_cost  # Incrementamos ciclos en fetch
             instruction = self.memory[self.pc]
             self.stages['decode']['instruction'] = instruction
             self.stages['decode']['busy'] = True
