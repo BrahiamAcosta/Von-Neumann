@@ -113,17 +113,16 @@ function App() {
   const toggleAutoMode = () => {
     setIsAutoMode((prev) => !prev);
   };
-
-  // Modifiqué el useEffect que maneja el autoMode
+  
   useEffect(() => {
-    if (isAutoMode) {
+    if (isAutoMode && data.status !== "finished") {
       autoModeRef.current = setInterval(nextLog, 1000);
     } else {
       clearInterval(autoModeRef.current);
     }
-
+  
     return () => clearInterval(autoModeRef.current);
-  }, [isAutoMode, currentLog, stepLogs, optimizedSimulator]); // Añadí optimizedSimulator como dependencia
+  }, [isAutoMode, currentLog, stepLogs, optimizedSimulator, data.status]);
 
   useEffect(() => {
     if (optimizedSimulator) {
