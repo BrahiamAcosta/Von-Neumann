@@ -1,5 +1,21 @@
+"""
+PipelineProcessor
+
+Este módulo implementa un procesador de pipeline de tres etapas: Fetch, Decode y Execute.
+Cada ciclo, el procesador intenta buscar, decodificar y ejecutar instrucciones almacenadas en la memoria.
+Las instrucciones están representadas en binario y se componen de un opcode (4 bits) y un operando (4 bits).
+
+Estructura del pipeline:
+- Fetch: Obtiene la instrucción de la memoria basada en el contador de programa (PC).
+- Decode: Decodifica la instrucción y determina la operación a realizar.
+- Execute: Ejecuta la instrucción en el acumulador o en la memoria.
+
+El pipeline maneja un conjunto de registros internos y cuenta los ciclos de ejecución.
+"""
+
 class PipelineProcessor:
     def __init__(self):
+        """Inicializa el procesador con un pipeline vacío, memoria predefinida y registros en cero."""
         self.stages = {
             'fetch': {'busy': False, 'instruction': None},
             'decode': {'busy': False, 'instruction': None},
@@ -22,6 +38,8 @@ class PipelineProcessor:
         self.last_instruction = None
         
     def decode_instruction(self, instruction):
+        """Decodifica una instrucción en su operación y operando correspondiente."""
+    
         if not instruction:
             return None
         op_code = instruction[:4]
@@ -34,6 +52,7 @@ class PipelineProcessor:
         return operations.get(op_code)
 
     def execute_pipeline_step(self):
+        """Ejecuta un paso del pipeline y retorna el estado del procesador."""
         logs = []
         base_cycle_cost = 1
         
