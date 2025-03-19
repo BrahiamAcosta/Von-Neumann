@@ -71,10 +71,18 @@ function App() {
 
   const reset = async () => {
     try {
-      const request = await fetch("http://localhost:8000/reset");
+      var request
+      if (optimizedSimulator) {
+        request = await fetch("http://localhost:8000/pipeline-reset");
+        console.log("Optimized Simulator")  
+      }
+      else{
+        request = await fetch("http://localhost:8000/reset");
+      }
       if (!request.ok) {
         throw new Error(`Error HTTP: ${request.status}`);
       }
+      console.log(request)
       const newState = await request.json();
       setData(newState);
     } catch (error) {
@@ -222,25 +230,25 @@ function App() {
                 />
               </div>
             </div>
-            {optimizedSimulator && <h1>Optimized Simulator selected</h1>}
             {optimizedSimulator && pipelineState && (
               <div className="pipeline-view">
-                <h3>Pipeline Status</h3>
+                <h3>Estado Pipeline</h3>
                 <div className="pipeline-stages">
                   {Object.entries(pipelineState.pipeline_state).map(([stage, info]) => (
                     <div key={stage} className="pipeline-stage">
                       <h4>{stage.toUpperCase()}</h4>
-                      <p>Status: {info.busy ? "Busy" : "Free"}</p>
-                      {info.instruction && <p>Instruction: {info.instruction}</p>}
+                      <p>Status: {info.busy ? "Ocupado" : "Disponible"}</p>
+                      {info.instruction && <p>Instrucción: {info.instruction}</p>}
                     </div>
                   ))}
                 </div>
                 <div className="pipeline-state">
                   <p>PC: {pipelineState.pc}</p>
-                  <p>Accumulator: {pipelineState.accumulator}</p>
+                  <p>Acumulador: {pipelineState.accumulator}</p>
                 </div>
               </div>
             )}
+            {console.log(pipelineState)}
             <div className="component_box">
               <div className="component_box_header">
                 <h2>Unidad Aritmético-Lógica (ALU)</h2>
