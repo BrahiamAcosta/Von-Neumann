@@ -74,17 +74,24 @@ function App() {
       var request
       if (optimizedSimulator) {
         request = await fetch("http://localhost:8000/pipeline-reset");
-        console.log("Optimized Simulator")  
       }
-      else{
+      else {
         request = await fetch("http://localhost:8000/reset");
       }
       if (!request.ok) {
         throw new Error(`Error HTTP: ${request.status}`);
       }
-      console.log(request)
       const newState = await request.json();
+      
+      // Reset completo de todos los estados
       setData(newState);
+      setStepLogs([]);
+      setCurrentLog(0);
+      setPipelineState(optimizedSimulator ? newState.pipeline_state : null);
+      setIsAutoMode(false);
+      if (autoModeRef.current) {
+        clearInterval(autoModeRef.current);
+      }
     } catch (error) {
       console.error("Error al reiniciar el proceso:", error);
     }
@@ -236,7 +243,7 @@ function App() {
                   {Object.entries(pipelineState.pipeline_state).map(([stage, info]) => (
                     <div key={stage} className="pipeline-stage">
                       <h4>{stage.toUpperCase()}</h4>
-                      <p>Status: {info.busy ? "Ocupado" : "Disponible"}</p>
+                      <p>Estado: {info.busy ? "Ocupado" : "Disponible"}</p>
                       {info.instruction && <p>Instrucción: {info.instruction}</p>}
                     </div>
                   ))}
