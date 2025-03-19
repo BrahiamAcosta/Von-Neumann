@@ -188,12 +188,42 @@ def execute_pipeline_step():
 @app.get("/pipeline-reset")
 def reset_pipeline():
     pipeline_processor.reset()
+    global total_cycles, total_instructions
+    alu.reset()
+    cu.reset()
+    mem.reset()
+    total_cycles = 0
+    total_instructions = 0
+    initial_pipeline_state = {
+        'fetch': {'busy': False, 'instruction': None},
+        'decode': {'busy': False, 'instruction': None},
+        'execute': {'busy': False, 'instruction': None}
+    }
     return {
         "status": "ok",
         "pipeline_state": {
-            "accumulator": pipeline_processor.accumulator,
-            "pc": pipeline_processor.pc,
+            "accumulator": "00000000",
+            "pc": "0000",               
             "memory": pipeline_processor.memory,
-            "pipeline_state": pipeline_processor.stages
+            "pipeline_state": initial_pipeline_state
+        },
+        "alu": {
+            "accumulator": alu.accumulator,
+            "i_registry": alu.i_registry
+        },
+        "cu": {
+            "counter": cu.counter,
+            "instructions_registry": cu.instructions_registry,
+            "operation": cu.operation
+        },
+        "mem": {
+           "dir_registry": mem.dir_registry,
+           "data_registry": mem.data_registry,
+           "memory": mem.memory_table
+        },
+        "stats": {
+            "cycles": total_cycles,
+            "instructions": total_instructions,
+            "cpi": 0
         }
     }

@@ -71,10 +71,18 @@ function App() {
 
   const reset = async () => {
     try {
-      const request = await fetch("http://localhost:8000/reset");
+      var request
+      if (optimizedSimulator) {
+        request = await fetch("http://localhost:8000/pipeline-reset");
+        console.log("Optimized Simulator")  
+      }
+      else{
+        request = await fetch("http://localhost:8000/reset");
+      }
       if (!request.ok) {
         throw new Error(`Error HTTP: ${request.status}`);
       }
+      console.log(request)
       const newState = await request.json();
       setData(newState);
     } catch (error) {
@@ -105,17 +113,16 @@ function App() {
   const toggleAutoMode = () => {
     setIsAutoMode((prev) => !prev);
   };
-
-  // Modifiqué el useEffect que maneja el autoMode
+  
   useEffect(() => {
-    if (isAutoMode) {
+    if (isAutoMode && data.status !== "finished") {
       autoModeRef.current = setInterval(nextLog, 1000);
     } else {
       clearInterval(autoModeRef.current);
     }
-
+  
     return () => clearInterval(autoModeRef.current);
-  }, [isAutoMode, currentLog, stepLogs, optimizedSimulator]); // Añadí optimizedSimulator como dependencia
+  }, [isAutoMode, currentLog, stepLogs, optimizedSimulator, data.status]);
 
   useEffect(() => {
     if (optimizedSimulator) {
@@ -228,14 +235,14 @@ function App() {
                 />
               </div>
             </div>
-            {optimizedSimulator && <h1>Simulador Optimizado</h1>}
             {optimizedSimulator && pipelineState && (
               <div className="pipeline-view">
+                <h3>Estado Pipeline</h3>
                 <div className="pipeline-stages">
                   {Object.entries(pipelineState.pipeline_state).map(([stage, info]) => (
                     <div key={stage} className="pipeline-stage">
                       <h4>{stage.toUpperCase()}</h4>
-                      <p>Estado: {info.busy ? "Busy" : "Free"}</p>
+                      <p>Status: {info.busy ? "Ocupado" : "Disponible"}</p>
                       {info.instruction && <p>Instrucción: {info.instruction}</p>}
                     </div>
                   ))}
@@ -246,6 +253,7 @@ function App() {
                 </div>
               </div>
             )}
+            {console.log(pipelineState)}
             <div className="component_box">
               <div className="component_box_header">
                 <h2>Unidad Aritmético-Lógica (ALU)</h2>
