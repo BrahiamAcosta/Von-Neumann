@@ -228,22 +228,21 @@ function App() {
                 />
               </div>
             </div>
-            {optimizedSimulator && <h1>Optimized Simulator selected</h1>}
+            {optimizedSimulator && <h1>Simulador Optimizado</h1>}
             {optimizedSimulator && pipelineState && (
               <div className="pipeline-view">
-                <h3>Pipeline Status</h3>
                 <div className="pipeline-stages">
                   {Object.entries(pipelineState.pipeline_state).map(([stage, info]) => (
                     <div key={stage} className="pipeline-stage">
                       <h4>{stage.toUpperCase()}</h4>
-                      <p>Status: {info.busy ? "Busy" : "Free"}</p>
-                      {info.instruction && <p>Instruction: {info.instruction}</p>}
+                      <p>Estado: {info.busy ? "Busy" : "Free"}</p>
+                      {info.instruction && <p>Instrucción: {info.instruction}</p>}
                     </div>
                   ))}
                 </div>
                 <div className="pipeline-state">
                   <p>PC: {pipelineState.pc}</p>
-                  <p>Accumulator: {pipelineState.accumulator}</p>
+                  <p>Acumulador: {pipelineState.accumulator}</p>
                 </div>
               </div>
             )}
