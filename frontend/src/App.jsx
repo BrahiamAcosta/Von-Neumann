@@ -10,6 +10,7 @@ function App() {
   const [optimizedSimulator, setOptimizedSimulator] = useState("no_choice");
   const [isAutoMode, setIsAutoMode] = useState(false);
   const autoModeRef = useRef(null);
+  const [pipelineState, setPipelineState] = useState(null);
 
   const step = async () => {
     try {
@@ -33,49 +34,110 @@ function App() {
     }
   };
 
+  const pipelineStep = async () => {
+    try {
+      const response = await fetch(
+        `http://localhost:8000/${data.status === "initial" ? "pipeline-reset" : "pipeline-step"}`
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error HTTP: ${response.status}`);
+      }
+
+      const newState = await response.json();
+      if (newState.status === "finished") {
+        setData({...data, status: "finished", stats: newState.stats});
+      } else {
+        setPipelineState(newState.pipeline_state);
+        // Actualizar el estado de la memoria
+        setData(prevData => ({
+          ...prevData,
+          mem: {
+            ...prevData.mem,
+            memory: newState.pipeline_state.memory
+          },
+          alu: {
+            ...prevData.alu,
+            accumulator: newState.pipeline_state.accumulator
+          }
+        }));
+        setStepLogs(newState.step_logs || []);
+        setCurrentLog(0);
+      }
+    } catch (error) {
+      console.error("Error en pipeline step:", error);
+    }
+  };
+
   const reset = async () => {
     try {
-      const request = await fetch("http://localhost:8000/reset");
+      var request
+      if (optimizedSimulator) {
+        request = await fetch("http://localhost:8000/pipeline-reset");
+      }
+      else {
+        request = await fetch("http://localhost:8000/reset");
+      }
       if (!request.ok) {
         throw new Error(`Error HTTP: ${request.status}`);
       }
       const newState = await request.json();
+      
+      // Reset completo de todos los estados
       setData(newState);
+      setStepLogs([]);
+      setCurrentLog(0);
+      setPipelineState(optimizedSimulator ? newState.pipeline_state : null);
+      setIsAutoMode(false);
+      if (autoModeRef.current) {
+        clearInterval(autoModeRef.current);
+      }
     } catch (error) {
       console.error("Error al reiniciar el proceso:", error);
     }
   };
 
+  // Modifiqué la función nextLog para manejar tanto el modo normal como el pipeline
   const nextLog = () => {
-    if (currentLog < stepLogs.length) {
-      const log = stepLogs[currentLog];
-
-      setData((prevData) => ({
-        ...prevData,
-        cu: { ...prevData.cu, ...log.cu },
-        alu: { ...prevData.alu, ...log.alu },
-        mem: { ...prevData.mem, ...log.mem },
-      }));
-
-      setCurrentLog(currentLog + 1);
+    if (optimizedSimulator) {
+      pipelineStep();
     } else {
-      step();
+      if (currentLog < stepLogs.length) {
+        const log = stepLogs[currentLog];
+        setData((prevData) => ({
+          ...prevData,
+          cu: { ...prevData.cu, ...log.cu },
+          alu: { ...prevData.alu, ...log.alu },
+          mem: { ...prevData.mem, ...log.mem },
+        }));
+        setCurrentLog(currentLog + 1);
+      } else {
+        step();
+      }
     }
   };
 
   const toggleAutoMode = () => {
     setIsAutoMode((prev) => !prev);
   };
-
+  
   useEffect(() => {
-    if (isAutoMode) {
+    if (isAutoMode && data.status !== "finished") {
       autoModeRef.current = setInterval(nextLog, 1000);
     } else {
       clearInterval(autoModeRef.current);
     }
-
+  
     return () => clearInterval(autoModeRef.current);
-  }, [isAutoMode, currentLog, stepLogs]);
+  }, [isAutoMode, currentLog, stepLogs, optimizedSimulator, data.status]);
+
+  useEffect(() => {
+    if (optimizedSimulator) {
+      pipelineStep();
+    } else {
+      step();
+    }
+  }, [optimizedSimulator]);
 
   useEffect(() => {
     step();
@@ -108,6 +170,23 @@ function App() {
       ) : data.status === "finished" ? (
         <>
           <h2>Proceso Finalizado</h2>
+          <div className="metrics-container">
+            <h3>Métricas de rendimiento</h3>
+            <div className="metrics-grid">
+              <div className="metric-item">
+                <span className="metric-label">Ciclos totales:</span>
+                <span className="metric-value">{data.stats?.cycles || 0}</span>
+              </div>
+              <div className="metric-item">
+                <span className="metric-label">Instrucciones ejecutadas:</span>
+                <span className="metric-value">{data.stats?.instructions || 0}</span>
+              </div>
+              <div className="metric-item">
+                <span className="metric-label">CPI (Ciclos por instrucción):</span>
+                <span className="metric-value">{data.stats?.cpi ? data.stats.cpi.toFixed(2) : "0"}</span>
+              </div>
+            </div>
+          </div>
           <button
             onClick={() => {
               setData({
@@ -163,7 +242,25 @@ function App() {
                 />
               </div>
             </div>
-            {optimizedSimulator && <h1>Optimized Simulator selected</h1>}
+            {optimizedSimulator && pipelineState && (
+              <div className="pipeline-view">
+                <h3>Estado Pipeline</h3>
+                <div className="pipeline-stages">
+                  {Object.entries(pipelineState.pipeline_state).map(([stage, info]) => (
+                    <div key={stage} className="pipeline-stage">
+                      <h4>{stage.toUpperCase()}</h4>
+                      <p>Estado: {info.busy ? "Ocupado" : "Disponible"}</p>
+                      {info.instruction && <p>Instrucción: {info.instruction}</p>}
+                    </div>
+                  ))}
+                </div>
+                <div className="pipeline-state">
+                  <p>PC: {pipelineState.pc}</p>
+                  <p>Acumulador: {pipelineState.accumulator}</p>
+                </div>
+              </div>
+            )}
+            {console.log(pipelineState)}
             <div className="component_box">
               <div className="component_box_header">
                 <h2>Unidad Aritmético-Lógica (ALU)</h2>
@@ -184,11 +281,25 @@ function App() {
           </div>
 
           <div className="buttons_container">
-            {!isAutoMode && <button onClick={nextLog}>Ejecutar Paso</button>}
+            {!isAutoMode && (
+              <button onClick={nextLog}>
+                {optimizedSimulator ? "Ejecutar Pipeline" : "Ejecutar Paso"}
+              </button>
+            )}
             <button onClick={toggleAutoMode}>
               {isAutoMode ? "Detener" : "Modo Automático"}
             </button>
           </div>
+          <button
+            onClick={() => {
+              setData({
+                status: "initial",
+              });
+              reset();
+            }}
+          >
+            Reiniciar
+          </button>
         </>
       )}
     </div>
