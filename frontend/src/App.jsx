@@ -81,6 +81,12 @@ function App() {
     step();
   }, []);
 
+  useEffect(() => {
+    if (performance.getEntriesByType("navigation")[0].type === "reload") {
+      reset();
+    }
+  }, []);
+
   return (
     <div>
       <h1>Máquina de Von Neumann</h1>
