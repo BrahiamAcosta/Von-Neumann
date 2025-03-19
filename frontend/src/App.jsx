@@ -284,6 +284,16 @@ function App() {
               {isAutoMode ? "Detener" : "Modo Automático"}
             </button>
           </div>
+          <button
+            onClick={() => {
+              setData({
+                status: "initial",
+              });
+              reset();
+            }}
+          >
+            Reiniciar
+          </button>
         </>
       )}
     </div>
